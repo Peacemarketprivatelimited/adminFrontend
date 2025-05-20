@@ -85,9 +85,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ token: propToken }) => 
     fetchCategories();
   }, []);
 
-  const getCategoryId = (category: Category): string => {
-    return category._id || category['*id'] || '';
-  };
+  
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

@@ -2,10 +2,11 @@ import axios from 'axios';
 // import dotenv from 'dotenv';
 
 // Load environment variables from a .env file
-// dotenv.config();
+// dotenv.config
+const API_URL=import.meta.env.VITE_BASE_URL
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: `${API_URL}`,
   headers: {
     'Content-Type': 'application/json',
   }
