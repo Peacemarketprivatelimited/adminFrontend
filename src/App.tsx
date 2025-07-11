@@ -9,8 +9,17 @@ import UserPage from './pages/User/UserPage';
 import AdminProducts from './pages/ShowAllProducts/AdminProducts';
 import WithDrawls from './pages/WithDrawls/WithDrawls';
 import Orders from './pages/Orders/Orders';
+import { useEffect } from 'react';
+import { logoutAdmin } from './services/authService';
 
 function App() {
+
+
+
+  useEffect(()=>{
+    logoutAdmin()
+
+  },[])
   return (
     <Router>
       <Routes>
