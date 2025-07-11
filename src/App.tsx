@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage/LoginPage';
-
 import ProtectedRoute from './Components/ProtectedRoute';
 import Sidebar from './Components/Sidebar';
 import DashboardPage from './pages/Dashboard/DashboardPage';
@@ -20,18 +19,18 @@ function App() {
           path="/*"
           element={
             <ProtectedRoute>
-              <div className="flex">
+              <div className="flex min-h-screen bg-gray-50">
                 <Sidebar />
-                <div className="flex-1">
+                <div className="flex-1 overflow-auto">
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/categories" element={<AddCategoryPage />} />
                     <Route path="/products" element={<ProductPage />} />
                     <Route path="/users" element={<UserPage />} />
                     <Route path="/adminProducts" element={<AdminProducts/>} />
                     <Route path="/withDrawls" element={<WithDrawls/>} />
                     <Route path="/orders" element={<Orders/>} />
-                    {/* Add other protected routes here */}
                   </Routes>
                 </div>
               </div>

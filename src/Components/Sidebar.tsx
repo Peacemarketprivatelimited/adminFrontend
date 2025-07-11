@@ -1,8 +1,17 @@
 import { useState } from 'react';
 import { links } from '../data/data';
+import { logoutAdmin } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
+    const navigate=useNavigate()
+
+    const handleLogout = () => {
+        logoutAdmin();
+        navigate('/login');
+    };
+
 
     return (
         <div className={`transition-all duration-300 ${isOpen ? 'w-64 p-4' : 'w-16 p-2'} bg-white shadow-md h-screen min-h-screen top-0 left-0 border-r dark:bg-gray-900 dark:border-gray-800 flex flex-col`}>
@@ -21,6 +30,13 @@ const Sidebar = () => {
                             <span className="text-green-600">ADMIN</span>
                         </h1>
                         <h2 className="text-2xl font-semibold text-gray-700 mt-1 dark:text-gray-200">DASHBOARD</h2>
+                    </div>
+
+                    <div>
+
+                        <button
+                        onClick={handleLogout}
+                        className='bg-red-600 m-2 p-2 rounded-lg border-full cursor-pointer'> Logout </button>
                     </div>
                 </div>
             )}
