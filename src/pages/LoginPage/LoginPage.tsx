@@ -10,6 +10,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
