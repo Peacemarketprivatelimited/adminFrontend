@@ -1,11 +1,13 @@
-import  { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getOrders } from '../../api/orderapi'
+import { updateOrderStatus } from '../../api/orderapi'; // Import the function
 
 const Orders = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [statusUpdate, setStatusUpdate] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -20,6 +22,28 @@ const Orders = () => {
     };
     fetchOrders();
   }, []);
+
+  
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    setStatusUpdate(prev => ({ ...prev, [orderId]: newStatus }));
+  };
+
+  const handleUpdateStatus = async (orderId: string) => {
+    const newStatus = statusUpdate[orderId];
+    if (!newStatus) return;
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      // Optionally, refresh orders list
+      setOrders(orders =>
+        orders.map(order =>
+          order._id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+      alert('Order status updated!');
+    } catch (err: any) {
+      alert('Failed to update status: ' + (err.message || 'Unknown error'));
+    }
+  };
 
   if (loading) return <div className="p-8 text-center text-blue-300">Loading orders...</div>;
   if (error) return <div className="p-8 text-center text-red-400">{error}</div>;
@@ -38,6 +62,7 @@ const Orders = () => {
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Status</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Total</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Date</th>
+                <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Phone Number</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -49,19 +74,38 @@ const Orders = () => {
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold
                       ${order.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
                         order.status === 'delivered' ? 'bg-green-900 text-green-300' :
-                        order.status === 'cancelled' ? 'bg-red-900 text-red-300' :
-                        'bg-blue-900 text-blue-300'}`}>
+                          order.status === 'cancelled' ? 'bg-red-900 text-red-300' :
+                            'bg-blue-900 text-blue-300'}`}>
                       {order.status}
                     </span>
                   </td>
                   <td className="py-3 px-6 font-bold text-blue-300">PKR {order.total}</td>
                   <td className="py-3 px-6">{new Date(order.createdAt).toLocaleString()}</td>
-                  <td className="py-3 px-6">
+                  <td className="py-3 px-6">{order.phoneNumber}</td>
+                  <td className="py-3 px-6 ">
                     <button
                       className="bg-gradient-to-r from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow font-semibold transition"
                       onClick={() => setSelectedOrder(order)}
                     >
                       View Details
+                    </button>
+                    <select
+                      className="mx-2 px-2 py-1 rounded bg-gray-800 text-blue-300 border border-blue-700"
+                      value={statusUpdate[order._id] || order.status}
+                      onChange={e => handleStatusChange(order._id, e.target.value)}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="processing">Processing</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="refunded">Refunded</option>
+                    </select>
+                    <button
+                      className="bg-gradient-to-r mx-2 from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow font-semibold transition"
+                      onClick={() => handleUpdateStatus(order._id)}
+                    >
+                      Update Status
                     </button>
                   </td>
                 </tr>

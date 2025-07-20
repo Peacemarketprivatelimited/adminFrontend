@@ -9,3 +9,7 @@ export const getOrders= async ()=>{
 
 
 }
+export const updateOrderStatus = async (orderId: string, status: string) => {
+  const response = await api.put(`/orders/orders/${orderId}/status`, { status });
+  return response.data;
+};
