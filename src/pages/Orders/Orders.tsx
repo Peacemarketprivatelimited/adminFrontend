@@ -38,6 +38,7 @@ const Orders = () => {
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Status</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Total</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Date</th>
+                <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Phone Number</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -56,12 +57,19 @@ const Orders = () => {
                   </td>
                   <td className="py-3 px-6 font-bold text-blue-300">PKR {order.total}</td>
                   <td className="py-3 px-6">{new Date(order.createdAt).toLocaleString()}</td>
-                  <td className="py-3 px-6">
+                  <td className="py-3 px-6">{order.phoneNumber}</td>
+                  <td className="py-3 px-6 ">
                     <button
                       className="bg-gradient-to-r from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow font-semibold transition"
                       onClick={() => setSelectedOrder(order)}
                     >
                       View Details
+                    </button> 
+                    <button
+                      className="bg-gradient-to-r mx-4 from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow font-semibold transition"
+                      // onClick={}
+                    >
+                      Update Status
                     </button>
                   </td>
                 </tr>
