@@ -6,6 +6,7 @@ const AddCategoryPage: React.FC = () => {
   return (
     <div>
       <CategoryForm />
+      
       <DeleteCategory/>
     </div>
   );
