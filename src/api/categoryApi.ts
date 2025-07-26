@@ -29,9 +29,22 @@ export const createCategory = async (categoryData: CategoryData): Promise<ApiRes
 
 export const getCategories = async () => {
     try {
-      const response = await api.get<{ categories: ApiResponse[] }>('/categories');
-      return response.data.categories;
+      const response = await api.get<{ categories: any[] }>('/categories');
+      // Map _id to id for frontend consistency
+      return response.data.categories.map(cat => ({
+        ...cat,
+        id: cat.id || cat._id, // ensure id is present
+      }));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to fetch categories');
     }
-  };
+};
+
+
+export const deleteCategory = async (id: string): Promise<void> => {
+    try {
+        await api.delete(`/categories/${id}`);
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || 'Failed to delete category');
+    }
+};
