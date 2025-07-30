@@ -3,6 +3,10 @@ import { getOrders } from '../../api/orderapi'
 import { updateOrderStatus } from '../../api/orderapi'; // Import the function
 
 const Orders = () => {
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +27,17 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch =
+      order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   const handleStatusChange = (orderId: string, newStatus: string) => {
     setStatusUpdate(prev => ({ ...prev, [orderId]: newStatus }));
   };
@@ -33,7 +47,7 @@ const Orders = () => {
     if (!newStatus) return;
     try {
       await updateOrderStatus(orderId, newStatus);
-      // Optionally, refresh orders list
+      // Update orders list
       setOrders(orders =>
         orders.map(order =>
           order._id === orderId ? { ...order, status: newStatus } : order
@@ -50,9 +64,38 @@ const Orders = () => {
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-200">
-      <h2 className="text-3xl font-bold mb-8 text-blue-400 drop-shadow text-center">All Orders</h2>
-      {orders.length === 0 ? (
-        <div className="text-center text-gray-400">No orders found.</div>
+      <h1 className="text-3xl font-bold mb-8 text-blue-400 drop-shadow text-center">All Orders</h1>
+
+      {/* Search and Filter Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <input
+          type="text"
+          placeholder="Search by Order # or Phone"
+          className="px-4 py-2 rounded-lg bg-gray-800 border border-blue-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          className="px-4 py-2 rounded-lg bg-gray-800 border border-blue-700 text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+
+      {/* Orders Table */}
+      {filteredOrders.length === 0 ? (
+        <div className="text-center text-gray-400 py-8">
+          {searchQuery || statusFilter !== 'all' ? 'No orders match your search criteria.' : 'No orders found.'}
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl shadow-2xl border border-gray-800 bg-gray-900">
           <table className="min-w-full divide-y divide-gray-800">
@@ -63,12 +106,11 @@ const Orders = () => {
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Total</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Date</th>
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Phone Number</th>
-                {/* <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Order Person Name</th> */}
                 <th className="py-3 px-6 text-left text-xs font-bold text-blue-300 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-gray-900 divide-y divide-gray-800">
-              {orders.map((order: any) => (
+              {filteredOrders.map((order: any) => (
                 <tr key={order._id} className="hover:bg-gray-800 transition">
                   <td className="py-3 px-6">{order.orderNumber}</td>
                   <td className="py-3 px-6">
@@ -83,32 +125,35 @@ const Orders = () => {
                   <td className="py-3 px-6 font-bold text-blue-300">PKR {order.total}</td>
                   <td className="py-3 px-6">{new Date(order.createdAt).toLocaleString()}</td>
                   <td className="py-3 px-6">{order.phoneNumber}</td>
-                  {/* <td className="py-3 px-6">{order.phoneNumber}</td> */}
-                  <td className="py-3 px-6 ">
-                    <button
-                      className="bg-gradient-to-r from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow font-semibold transition"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      View Details
-                    </button>
-                    <select
-                      className="mx-2 px-2 py-1 rounded bg-gray-800 text-blue-300 border border-blue-700"
-                      value={statusUpdate[order._id] || order.status}
-                      onChange={e => handleStatusChange(order._id, e.target.value)}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="refunded">Refunded</option>
-                    </select>
-                    <button
-                      className="bg-gradient-to-r mx-2 from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow font-semibold transition"
-                      onClick={() => handleUpdateStatus(order._id)}
-                    >
-                      Update Status
-                    </button>
+                  <td className="py-3 px-6">
+                    <div className="flex flex-col lg:flex-row gap-2 items-start lg:items-center">
+                      <button
+                        className="bg-gradient-to-r from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-4 py-2 rounded-lg shadow font-semibold transition text-sm"
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        View Details
+                      </button>
+                      <div className="flex gap-2 items-center">
+                        <select
+                          className="px-2 py-1 rounded bg-gray-800 text-blue-300 border border-blue-700 text-sm"
+                          value={statusUpdate[order._id] || order.status}
+                          onChange={e => handleStatusChange(order._id, e.target.value)}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                          <option value="refunded">Refunded</option>
+                        </select>
+                        <button
+                          className="bg-gradient-to-r from-blue-700 to-green-600 hover:from-blue-800 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow font-semibold transition text-sm"
+                          onClick={() => handleUpdateStatus(order._id)}
+                        >
+                          Update
+                        </button>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -120,7 +165,7 @@ const Orders = () => {
       {/* Modal for order details */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-8 relative border-2 border-blue-900 text-gray-200">
+          <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-8 relative border-2 border-blue-900 text-gray-200 max-h-[90vh] overflow-y-auto">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-blue-400 text-3xl font-bold"
               onClick={() => setSelectedOrder(null)}
