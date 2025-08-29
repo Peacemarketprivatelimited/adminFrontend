@@ -8,6 +8,10 @@ export const getAllUsers=async () => {
 
 }
 
+export const getUsersPaginated = async (page: number, limit: number = 10) => {
+    const response = await api.get(`/admin/users?page=${page}&limit=${limit}`);
+    return response.data; // Should include { users: [...], total: number }
+}
 export const deleteUser=async (id:string) => {
     const response=await api.delete(`/admin/users/${id}`);
     return response.data
