@@ -1,19 +1,31 @@
-import React, { useEffect, useState } from 'react'
-import { getAllUsers } from '../../api/usersApi'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { getUsersPaginated, deleteUser } from '../../api/usersApi'
 import { User } from '../../types/user'
 
 const UserPage = () => {
   const [users, setUsers] = useState<User[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [openUserId, setOpenUserId] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const observer = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await getAllUsers() as { users: User[] }
-      setUsers(response.users)
+      setLoading(true)
+      try {
+        const response = await getUsersPaginated(page, 10) as { users: User[] }
+        setUsers(prev => [...prev, ...response.users])
+        setHasMore(response.users.length === 10)
+      } catch {
+        setHasMore(false)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchUsers()
-  }, [])
+  }, [page])
 
   // Filter users based on search query
   const filteredUsers = users.filter(user => {
@@ -24,15 +36,41 @@ const UserPage = () => {
       user.username?.toLowerCase().includes(query)
     )
   })
-  
+
   const toggleDropdown = (userId: string) => {
     setOpenUserId(openUserId === userId ? null : userId)
   }
 
+  // Infinite scroll observer
+  const lastUserRef = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      if (loading) return
+      if (observer.current) observer.current.disconnect()
+      observer.current = new window.IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => prev + 1)
+        }
+      })
+      if (node) observer.current.observe(node)
+    },
+    [loading, hasMore]
+  )
+
+  const handleDeleteUser = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await deleteUser(id);
+        setUsers(users.filter(u => u._id !== id));
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete user');
+      }
+    }
+  };
+
   return (
     <div className="p-4 min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-200">
       <h1 className="text-3xl font-bold mb-6 text-blue-400 drop-shadow">Users</h1>
-      
+
       {/* Search Input */}
       <div className="mb-6">
         <input
@@ -62,7 +100,7 @@ const UserPage = () => {
               <th className="px-4 py-3 text-blue-300 font-semibold">Actions</th>
             </tr>
           </thead>
-       
+
           <tbody>
             {filteredUsers.length === 0 ? (
               <tr>
@@ -71,9 +109,12 @@ const UserPage = () => {
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
+              filteredUsers.map((user, idx) => (
                 <React.Fragment key={user._id}>
-                  <tr className="border-t border-gray-700 hover:bg-gray-700 transition">
+                  <tr
+                    className="border-t border-gray-700 hover:bg-gray-700 transition"
+                    ref={idx === filteredUsers.length - 1 ? lastUserRef : undefined}
+                  >
                     <td className="px-4 py-2">{user.name}</td>
                     <td className="px-4 py-2">{user.email}</td>
                     <td className="px-4 py-2">{user.username}</td>
@@ -84,15 +125,21 @@ const UserPage = () => {
                       </span>
                     </td>
                     <td className="px-4 py-2">{new Date(user.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 flex space-x-2">
                       <button
                         className={`px-4 py-2 rounded transition font-semibold shadow 
-                          ${openUserId === user._id 
-                            ? "bg-blue-700 hover:bg-blue-800 text-white" 
+                          ${openUserId === user._id
+                            ? "bg-blue-700 hover:bg-blue-800 text-white"
                             : "bg-blue-500 hover:bg-blue-600 text-white"}`}
                         onClick={() => toggleDropdown(user._id)}
                       >
                         {openUserId === user._id ? 'Hide' : 'Details'}
+                      </button>
+                      <button
+                        className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white font-semibold shadow"
+                        onClick={() => handleDeleteUser(user._id)}
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -107,8 +154,8 @@ const UserPage = () => {
                             <ul className="list-disc ml-6 text-sm">
                               {[...Array(10)].map((_, idx) => (
                                 <li key={idx}>
-                                  <span className="text-blue-200">Level {idx + 1}:</span> 
-                                  <span className="text-gray-200"> {Array.isArray(user.referral[`level${idx + 1}`]) ? user.referral[`level${idx + 1}`].length : 0} users</span>, 
+                                  <span className="text-blue-200">Level {idx + 1}:</span>
+                                  <span className="text-gray-200"> {Array.isArray(user.referral[`level${idx + 1}`]) ? user.referral[`level${idx + 1}`].length : 0} users</span>,
                                   <span className="text-green-400"> Earnings: PKR {user.referral.earningsByLevel[`level${idx + 1}`] || 0}</span>
                                 </li>
                               ))}
@@ -116,7 +163,7 @@ const UserPage = () => {
                           </div>
                           <div><b className="text-blue-300">Subscription Amount Paid:</b> <span className="text-purple-400">PKR {user.subscription.amountPaid}</span></div>
                           <div>
-                            <b className="text-blue-300">Permissions:</b> 
+                            <b className="text-blue-300">Permissions:</b>
                             <span className="text-gray-300"> {Object.entries(user.permissions).map(([key, value]) => `${key}: ${value ? 'Yes' : 'No'}`).join(', ')}</span>
                           </div>
                         </div>
@@ -129,6 +176,8 @@ const UserPage = () => {
           </tbody>
         </table>
       </div>
+      {loading && <div className="text-center py-4">Loading...</div>}
+      {!hasMore && <div className="text-center py-4 text-gray-500">No more users.</div>}
     </div>
   )
 }
