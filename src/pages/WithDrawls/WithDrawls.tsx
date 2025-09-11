@@ -26,8 +26,8 @@ const WithDrawls: React.FC = () => {
         console.log('Received data:', data);
         
         // Check if the response has the expected structure
-        if (data && typeof data === 'object' && Array.isArray(data.withdrawals)) {
-          setWithdrawalData(data);
+        if (data && typeof data === 'object' && Array.isArray((data as any).withdrawals)) {
+          setWithdrawalData(data as WithdrawalResponse);
           setError("");
         } else {
           console.error('Unexpected API response format:', data);
