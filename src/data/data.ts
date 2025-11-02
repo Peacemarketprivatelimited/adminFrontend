@@ -40,5 +40,11 @@ export const links = [
         url: '/withDrawls',
         text: 'WithDrawls',
         icon: 'orders', // You can add icons from lucide-react
+      }, 
+      {
+        id: 8,
+        url: '/blogs',
+        text: 'blogs',
+        icon: 'blog', // You can add icons from lucide-react
       },
   ];
