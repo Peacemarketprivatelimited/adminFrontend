@@ -9,6 +9,9 @@ import UserPage from './pages/User/UserPage';
 import AdminProducts from './pages/ShowAllProducts/AdminProducts';
 import WithDrawls from './pages/WithDrawls/WithDrawls';
 import Orders from './pages/Orders/Orders';
+import BlogListPage from './pages/Blog/BlogListPage';
+import BlogFormPage from './pages/Blog/BlogFormPage';
+
 
 function App() {
 
@@ -32,9 +35,15 @@ function App() {
                     <Route path="/categories" element={<AddCategoryPage />} />
                     <Route path="/products" element={<ProductPage />} />
                     <Route path="/users" element={<UserPage />} />
-                    <Route path="/adminProducts" element={<AdminProducts/>} />
-                    <Route path="/withDrawls" element={<WithDrawls/>} />
-                    <Route path="/orders" element={<Orders/>} />
+                    <Route path="/adminProducts" element={<AdminProducts />} />
+                    <Route path="/withDrawls" element={<WithDrawls />} />
+                    <Route path="/orders" element={<Orders />} />
+
+
+                    <Route path="/blogs" element={<BlogListPage />} />
+                    <Route path="/blogs/create" element={<BlogFormPage />} />
+                    <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
+
                   </Routes>
                 </div>
               </div>
