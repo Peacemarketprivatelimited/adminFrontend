@@ -47,4 +47,10 @@ export const links = [
         text: 'blogs',
         icon: 'blog', // You can add icons from lucide-react
       },
+      {
+        id: 8,
+        url: '/Watch&Earn',
+        text: 'Watch & Earn',
+        icon: 'link', // You can add icons from lucide-react
+      },
   ];

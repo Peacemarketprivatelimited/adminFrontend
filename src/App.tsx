@@ -11,6 +11,7 @@ import WithDrawls from './pages/WithDrawls/WithDrawls';
 import Orders from './pages/Orders/Orders';
 import BlogListPage from './pages/Blog/BlogListPage';
 import BlogFormPage from './pages/Blog/BlogFormPage';
+import EarnPage from './pages/EarnPage/EarnPage';
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                     <Route path="/adminProducts" element={<AdminProducts />} />
                     <Route path="/withDrawls" element={<WithDrawls />} />
                     <Route path="/orders" element={<Orders />} />
+                    <Route path="//Watch&Earn" element={<EarnPage />} />
 
 
                     <Route path="/blogs" element={<BlogListPage />} />
