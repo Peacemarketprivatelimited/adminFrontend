@@ -12,6 +12,7 @@ import Orders from './pages/Orders/Orders';
 import BlogListPage from './pages/Blog/BlogListPage';
 import BlogFormPage from './pages/Blog/BlogFormPage';
 import EarnPage from './pages/EarnPage/EarnPage';
+import Tasks from './pages/Taskspage/Tasks';
 
 
 function App() {
@@ -45,6 +46,11 @@ function App() {
                     <Route path="/blogs" element={<BlogListPage />} />
                     <Route path="/blogs/create" element={<BlogFormPage />} />
                     <Route path="/blogs/edit/:id" element={<BlogFormPage />} />
+
+                     <Route path="/tasks" element={<Tasks />} />
+
+
+
 
                   </Routes>
                 </div>
